@@ -65,7 +65,7 @@
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      console.log(data);
+      
       // Sort and store temperature data
       irradianceData = data.sort((a: { timestamp: string }, b: { timestamp: string }) => 
         new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
