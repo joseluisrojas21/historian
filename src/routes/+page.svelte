@@ -3,6 +3,8 @@
   import Chart from 'chart.js/auto';
   import 'chartjs-adapter-date-fns';
 
+  document.title = "Historian";
+
   let temperatureChart: Chart | null = null;
   let pressureChart: Chart | null = null;
   let temperatureData: { timestamp: string, temperature: number }[] = [];
@@ -179,7 +181,7 @@
 </script>
 
 <main>
-  <h1>Temperature and Pressure Data Charts</h1>
+  <h1>Historian</h1>
   
   <div class="charts-container">
     <div class="chart">
