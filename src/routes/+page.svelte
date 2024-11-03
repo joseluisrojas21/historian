@@ -3,8 +3,6 @@
   import Chart from 'chart.js/auto';
   import 'chartjs-adapter-date-fns';
 
-  document.title = "Historian";
-
   let temperatureChart: Chart | null = null;
   let pressureChart: Chart | null = null;
   let temperatureData: { timestamp: string, temperature: number }[] = [];
@@ -167,6 +165,7 @@
   }
 
   onMount(() => {
+    document.title = "Historian";
     fetchTemperatureData();
     fetchPressureData();
     const interval = setInterval(() => {
