@@ -25,10 +25,28 @@ def add_random_temperature_data():
   conn.commit()
   print(f"Added temperature data: {timestamp} - {temperature}°C")
 
+# Function to add random pressure data
+def add_random_pressure_data():
+  # Generate a random pressure between 950 and 1050 hPa
+  pressure = round(random.uniform(950.00, 1050.00), 2)
+
+  # Current date and time
+  timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+  sql = '''INSERT INTO pressure_data (timestamp, pressure) VALUES (?, ?)'''
+
+  # Execute the SQL command
+  cursor.execute(sql, (timestamp, pressure))
+
+  # Commit the changes
+  conn.commit()
+  print(f"Added pressure data: {timestamp} - {pressure} hPa")
+
 if __name__ == "__main__":
   while True:
     add_random_temperature_data()
-    time.sleep(10)  # Wait for 10 second before the next entry
+    add_random_pressure_data()
+    time.sleep(10)  # Wait for 10 seconds before the next entry
 
 # Close the database connection
 cursor.close()

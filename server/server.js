@@ -16,6 +16,7 @@ const db = new Database('./database/testDB.db');
 app.get('/pressure', (req, res) => {
   try {
     const data = db.prepare('SELECT timestamp, pressure FROM pressure_data').all();
+    console.log(data);
     res.json(data);
   } catch (error) {
     console.error('Error fetching pressure data:', error);
