@@ -184,19 +184,31 @@
   <h2>Temperature Data</h2>
   <canvas bind:this={tempCanvas} width="400" height="200"></canvas>
   
+  <h2>Pressure Data</h2>
+  <canvas bind:this={pressureCanvas} width="400" height="200"></canvas>
+  
   <div class="slider-controls">
     <label>
       Start Range:
-      <input type="range" min="0" max="100" bind:value={sliderMin} on:change={updateTemperatureChart} />
+      <input 
+        type="range" 
+        min="0" 
+        max="100" 
+        bind:value={sliderMin} 
+        on:change={() => { updateTemperatureChart(); updatePressureChart(); }} 
+      />
     </label>
     <label>
       End Range:
-      <input type="range" min="0" max="100" bind:value={sliderMax} on:change={updateTemperatureChart} />
+      <input 
+        type="range" 
+        min="0" 
+        max="100" 
+        bind:value={sliderMax} 
+        on:change={() => { updateTemperatureChart(); updatePressureChart(); }} 
+      />
     </label>
   </div>
-
-  <h2>Pressure Data</h2>
-  <canvas bind:this={pressureCanvas} width="400" height="200"></canvas>
 </main>
 
 <style>
