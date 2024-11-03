@@ -42,10 +42,28 @@ def add_random_pressure_data():
   conn.commit()
   print(f"Added pressure data: {timestamp} - {pressure} hPa")
 
+# Function to add random irradiance data
+def add_random_irradiance_data():
+  # Generate a random irradiance between 0 and 1000 W/m²
+  irradiance = round(random.uniform(0, 1000), 2)
+
+  # Current date and time
+  timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+  sql = '''INSERT INTO irradiance_data (timestamp, irradiance) VALUES (?, ?)'''
+
+  # Execute the SQL command
+  cursor.execute(sql, (timestamp, irradiance))
+
+  # Commit the changes
+  conn.commit()
+  print(f"Added irradiance data: {timestamp} - {irradiance} W/m²")
+
 if __name__ == "__main__":
   while True:
     add_random_temperature_data()
     add_random_pressure_data()
+    add_random_irradiance_data()  # Add irradiance data
     time.sleep(10)  # Wait for 10 seconds before the next entry
 
 # Close the database connection
