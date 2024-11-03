@@ -181,11 +181,17 @@
 <main>
   <h1>Temperature and Pressure Data Charts</h1>
   
-  <h2>Temperature Data</h2>
-  <canvas bind:this={tempCanvas} width="400" height="200"></canvas>
-  
-  <h2>Pressure Data</h2>
-  <canvas bind:this={pressureCanvas} width="400" height="200"></canvas>
+  <div class="charts-container">
+    <div class="chart">
+      <h2>Temperature Data</h2>
+      <canvas bind:this={tempCanvas} width="300" height="150"></canvas>
+    </div>
+    
+    <div class="chart">
+      <h2>Pressure Data</h2>
+      <canvas bind:this={pressureCanvas} width="300" height="150"></canvas>
+    </div>
+  </div>
   
   <div class="slider-controls">
     <label>
@@ -224,16 +230,26 @@
 
   h2 {
     color: #555;
+  }
+
+  .charts-container {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
     margin-top: 2rem;
   }
 
+  .chart {
+    width: 45%;
+    text-align: center;
+  }
+
   canvas {
-    margin-top: 1rem;
     border: 1px solid #ccc;
   }
 
   .slider-controls {
-    margin-top: 1rem;
+    margin-top: 2rem;
     display: flex;
     justify-content: center;
     gap: 1rem;
