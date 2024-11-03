@@ -287,7 +287,7 @@
         min="0" 
         max="100" 
         bind:value={sliderMin} 
-        on:change={() => { updateTemperatureChart(); updatePressureChart(); }} 
+        on:change={() => { updateTemperatureChart(); updatePressureChart(); updateIrradianceChart(); }} 
       />
     </label>
     <label>
@@ -297,7 +297,7 @@
         min="0" 
         max="100" 
         bind:value={sliderMax} 
-        on:change={() => { updateTemperatureChart(); updatePressureChart(); }} 
+        on:change={() => { updateTemperatureChart(); updatePressureChart(); updateIrradianceChart(); }} 
       />
     </label>
   </div>
