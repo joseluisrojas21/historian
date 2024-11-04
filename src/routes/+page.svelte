@@ -5,11 +5,14 @@
 
   let temperatureChart: Chart | null = null;
   let pressureChart: Chart | null = null;
+  let irradianceChart: Chart | null = null;
+  let irradianceData: { timestamp: string, irradiance: number }[] = [];
   let temperatureData: { timestamp: string, temperature: number }[] = [];
   let pressureData: { timestamp: string, pressure: number }[] = [];
   let timeLabels: string[] = [];
   let tempCanvas: HTMLCanvasElement | null = null; // Canvas for temperature chart
   let pressureCanvas: HTMLCanvasElement | null = null; // Canvas for pressure chart
+  let irradianceCanvas: HTMLCanvasElement | null = null; // Canvas for irradiance chart
 
   // Slider values representing the range of data to display
   let sliderMin = 0;
@@ -52,6 +55,25 @@
       updatePressureChart();
     } catch (error) {
       console.error('Error fetching pressure data:', error);
+    }
+  }
+
+  async function fetchIrradianceData() {
+    try {
+      const response = await fetch('http://localhost:3000/irradiance');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      
+      // Sort and store temperature data
+      irradianceData = data.sort((a: { timestamp: string }, b: { timestamp: string }) => 
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      );
+
+      updateIrradianceChart();
+    } catch (error) {
+      console.error('Error fetching temperature data:', error);
     }
   }
 
@@ -164,13 +186,69 @@
     }
   }
 
+  // Filter data based on slider range and update the solar chart
+  function updateIrradianceChart() {
+    const dataCount = irradianceData.length;
+    const minIndex = Math.floor((sliderMin / 100) * dataCount);
+    const maxIndex = Math.floor((sliderMax / 100) * dataCount);
+    const filteredData = irradianceData.slice(minIndex, maxIndex + 1);
+
+    const radiationLevels = filteredData.map((item) => item.irradiance);
+
+    if (irradianceChart) {
+      irradianceChart.data.labels = timeLabels;
+      irradianceChart.data.datasets[0].data = radiationLevels;
+      irradianceChart.update();
+    } else if (irradianceCanvas) {
+      const ctx = irradianceCanvas.getContext('2d');
+      if (ctx) {
+        irradianceChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: timeLabels,
+            datasets: [{
+              label: 'Solar Radiation over Time',
+              data: radiationLevels,
+              borderColor: 'rgba(255, 206, 86, 1)',
+              fill: false,
+              tension: 0.1
+            }]
+          },
+          options: {
+            scales: {
+              x: {
+                type: 'time',
+                time: {
+                  unit: 'minute'
+                },
+                title: {
+                  display: true,
+                  text: 'Time'
+                }
+              },
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Radiation (W/m²)'
+                }
+              }
+            }
+          }
+        });
+      }
+    }
+  }
+
   onMount(() => {
     document.title = "Historian";
     fetchTemperatureData();
     fetchPressureData();
+    fetchIrradianceData();
     const interval = setInterval(() => {
       fetchTemperatureData();
       fetchPressureData();
+      fetchIrradianceData();
     }, 10000); // Update every 10 seconds
 
     onDestroy(() => {
@@ -193,7 +271,14 @@
       <canvas bind:this={pressureCanvas} width="300" height="150"></canvas>
     </div>
   </div>
-  
+
+  <div class="charts-container">
+    <div class="chart">
+      <h2>Irradiance Data</h2>
+      <canvas bind:this={irradianceCanvas} width="300" height="150"></canvas>
+    </div>
+  </div>
+
   <div class="slider-controls">
     <label>
       Start Range:
@@ -202,7 +287,7 @@
         min="0" 
         max="100" 
         bind:value={sliderMin} 
-        on:change={() => { updateTemperatureChart(); updatePressureChart(); }} 
+        on:change={() => { updateTemperatureChart(); updatePressureChart(); updateIrradianceChart(); }} 
       />
     </label>
     <label>
@@ -212,7 +297,7 @@
         min="0" 
         max="100" 
         bind:value={sliderMax} 
-        on:change={() => { updateTemperatureChart(); updatePressureChart(); }} 
+        on:change={() => { updateTemperatureChart(); updatePressureChart(); updateIrradianceChart(); }} 
       />
     </label>
   </div>

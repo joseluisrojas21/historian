@@ -12,6 +12,18 @@ app.use(express.json());
 // Initialize database
 const db = new Database('./database/testDB.db');
 
+// Route to fetch irradiance data
+app.get('/irradiance', (req, res) => {
+  try {
+    const data = db.prepare('SELECT timestamp, irradiance FROM irradiance_data').all();
+    console.log(data);
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching irradiance data:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 // Route to fetch pressure data
 app.get('/pressure', (req, res) => {
   try {
