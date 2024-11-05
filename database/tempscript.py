@@ -59,11 +59,56 @@ def add_random_irradiance_data():
   conn.commit()
   print(f"Added irradiance data: {timestamp} - {irradiance} W/m²")
 
+# Function to add random humidity data
+def add_random_humidity_data():
+    humidity = round(random.uniform(0, 100), 2)
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    cursor.execute('''INSERT INTO humidity_data (timestamp, humidity) VALUES (?, ?)''', (timestamp, humidity))
+    conn.commit()
+    print(f"Added humidity data: {timestamp} - {humidity}%")
+
+# Function to add random garage data
+def add_random_garage_data():
+    garage = random.choice([0, 1])
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    cursor.execute('''INSERT INTO garage_data (timestamp, garage) VALUES (?, ?)''', (timestamp, garage))
+    conn.commit()
+    print(f"Added garage data: {timestamp} - {garage}")
+
+# Function to add random bathroom data
+def add_random_bathroom_data():
+    bathroom = random.choice([0, 1])
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    cursor.execute('''INSERT INTO bathroom_data (timestamp, bathroom) VALUES (?, ?)''', (timestamp, bathroom))
+    conn.commit()
+    print(f"Added bathroom data: {timestamp} - {bathroom}")
+
+# Function to add random bedroom data
+def add_random_bedroom_data():
+    bedroom = random.choice([0, 1])
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    cursor.execute('''INSERT INTO bedroom_data (timestamp, bedroom) VALUES (?, ?)''', (timestamp, bedroom))
+    conn.commit()
+    print(f"Added bedroom data: {timestamp} - {bedroom}")
+
+# Function to add random lr data
+def add_random_lr_data():
+    lr = random.choice([0, 1])
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    cursor.execute('''INSERT INTO lr_data (timestamp, lr) VALUES (?, ?)''', (timestamp, lr))
+    conn.commit()
+    print(f"Added bedroom data: {timestamp} - {lr}")
+
 if __name__ == "__main__":
   while True:
     add_random_temperature_data()
     add_random_pressure_data()
-    add_random_irradiance_data()  # Add irradiance data
+    add_random_irradiance_data()
+    add_random_humidity_data()
+    add_random_garage_data()
+    add_random_bathroom_data()
+    add_random_bedroom_data()
+    add_random_lr_data()
     time.sleep(10)  # Wait for 10 seconds before the next entry
 
 # Close the database connection

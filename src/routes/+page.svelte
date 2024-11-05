@@ -3,16 +3,40 @@
   import Chart from 'chart.js/auto';
   import 'chartjs-adapter-date-fns';
 
+  // Charts
   let temperatureChart: Chart | null = null;
   let pressureChart: Chart | null = null;
   let irradianceChart: Chart | null = null;
+  let humidityChart: Chart | null = null;
+  let garageChart: Chart | null = null;
+  let bathroomChart: Chart | null = null;
+  let bedroomChart: Chart | null = null;
+  let lrChart: Chart | null = null;
+
+  // Data
   let irradianceData: { timestamp: string, irradiance: number }[] = [];
   let temperatureData: { timestamp: string, temperature: number }[] = [];
   let pressureData: { timestamp: string, pressure: number }[] = [];
+  let humidityData: { timestamp: string, humidity: number }[] = [];
+  let garageData: { timestamp: string, garage: number }[] = [];
+  let bathroomData: { timestamp: string, bathroom: number }[] = [];
+  let bedroomData: { timestamp: string, bedroom: number }[] = [];
+  let lrData: { timestamp: string, lr: number }[] = [];
+
+  // Time labels
   let timeLabels: string[] = [];
-  let tempCanvas: HTMLCanvasElement | null = null; // Canvas for temperature chart
-  let pressureCanvas: HTMLCanvasElement | null = null; // Canvas for pressure chart
-  let irradianceCanvas: HTMLCanvasElement | null = null; // Canvas for irradiance chart
+
+  // Canvas
+  let tempCanvas: HTMLCanvasElement | null = null;
+  let pressureCanvas: HTMLCanvasElement | null = null;
+  let irradianceCanvas: HTMLCanvasElement | null = null;
+  let humidityCanvas: HTMLCanvasElement | null = null;
+  let motionGarageCanvas: HTMLCanvasElement | null = null;
+  let motionBathroomCanvas: HTMLCanvasElement | null = null;
+  let motionBedroomCanvas: HTMLCanvasElement | null = null;
+  let motionLRCanvas: HTMLCanvasElement | null = null;
+
+  // Add Humidity, Motion sensor garage, bathroom, bedroom, LR
 
   // Slider values representing the range of data to display
   let sliderMin = 0;
@@ -27,7 +51,6 @@
       }
       const data = await response.json();
       
-      // Sort and store temperature data
       temperatureData = data.sort((a: { timestamp: string }, b: { timestamp: string }) => 
         new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
       );
@@ -47,7 +70,6 @@
       }
       const data = await response.json();
       
-      // Sort and store pressure data
       pressureData = data.sort((a: { timestamp: string }, b: { timestamp: string }) => 
         new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
       );
@@ -58,6 +80,7 @@
     }
   }
 
+  // Fetch irradiance
   async function fetchIrradianceData() {
     try {
       const response = await fetch('http://localhost:3000/irradiance');
@@ -66,7 +89,6 @@
       }
       const data = await response.json();
       
-      // Sort and store temperature data
       irradianceData = data.sort((a: { timestamp: string }, b: { timestamp: string }) => 
         new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
       );
@@ -77,7 +99,101 @@
     }
   }
 
-  // Filter data based on slider range and update the temperature chart
+  // Fetch humidity data
+  async function fetchHumidityData() {
+    try {
+      const response = await fetch('http://localhost:3000/humidity');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      
+      humidityData = data.sort((a: { timestamp: string }, b: { timestamp: string }) => 
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      );
+
+      updateHumidityChart();
+    } catch (error) {
+      console.error('Error fetching humidity data:', error);
+    }
+  }
+
+  // Fetch garage data
+  async function fetchGarageData() {
+    try {
+      const response = await fetch('http://localhost:3000/garage');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      
+      garageData = data.sort((a: { timestamp: string }, b: { timestamp: string }) => 
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      );
+
+      updateGarageChart();
+    } catch (error) {
+      console.error('Error fetching garage data:', error);
+    }
+  }
+
+  // Fetch bathroom data
+  async function fetchBathroomData() {
+    try {
+      const response = await fetch('http://localhost:3000/bathroom');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      
+      bathroomData = data.sort((a: { timestamp: string }, b: { timestamp: string }) => 
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      );
+
+      updateBathroomChart();
+    } catch (error) {
+      console.error('Error fetching bathroom data:', error);
+    }
+  }
+
+  // Fetch bathroom data
+  async function fetchBedroomData() {
+    try {
+      const response = await fetch('http://localhost:3000/bedroom');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      
+      bedroomData = data.sort((a: { timestamp: string }, b: { timestamp: string }) => 
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      );
+
+      updateBedroomChart();
+    } catch (error) {
+      console.error('Error fetching bedroom data:', error);
+    }
+  }
+
+  // Fetch lr data
+  async function fetchLRata() {
+    try {
+      const response = await fetch('http://localhost:3000/lr');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      
+      lrData = data.sort((a: { timestamp: string }, b: { timestamp: string }) => 
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      );
+
+      updateLRChart();
+    } catch (error) {
+      console.error('Error fetching lr data:', error);
+    }
+  }
+
   function updateTemperatureChart() {
     const dataCount = temperatureData.length;
     const minIndex = Math.floor((sliderMin / 100) * dataCount);
@@ -119,7 +235,7 @@
                 }
               },
               y: {
-                beginAtZero: true,
+                beginAtZero: false,
                 title: {
                   display: true,
                   text: 'Temperature (°C)'
@@ -132,7 +248,6 @@
     }
   }
 
-  // Filter data based on slider range and update the pressure chart
   function updatePressureChart() {
     const dataCount = pressureData.length;
     const minIndex = Math.floor((sliderMin / 100) * dataCount);
@@ -173,7 +288,7 @@
                 }
               },
               y: {
-                beginAtZero: true,
+                beginAtZero: false,
                 title: {
                   display: true,
                   text: 'Pressure (hPa)'
@@ -186,7 +301,6 @@
     }
   }
 
-  // Filter data based on slider range and update the solar chart
   function updateIrradianceChart() {
     const dataCount = irradianceData.length;
     const minIndex = Math.floor((sliderMin / 100) * dataCount);
@@ -227,10 +341,275 @@
                 }
               },
               y: {
-                beginAtZero: true,
+                beginAtZero: false,
                 title: {
                   display: true,
                   text: 'Radiation (W/m²)'
+                }
+              }
+            }
+          }
+        });
+      }
+    }
+  }
+
+  function updateHumidityChart() {
+    const dataCount = humidityData.length;
+    const minIndex = Math.floor((sliderMin / 100) * dataCount);
+    const maxIndex = Math.floor((sliderMax / 100) * dataCount);
+    const filteredData = humidityData.slice(minIndex, maxIndex + 1);
+
+    const humidityLevels = filteredData.map((item) => item.humidity);
+
+    if (humidityChart) {
+      humidityChart.data.labels = timeLabels;
+      humidityChart.data.datasets[0].data = humidityLevels;
+      humidityChart.update();
+    } else if (humidityCanvas) {
+      const ctx = humidityCanvas.getContext('2d');
+      if (ctx) {
+        humidityChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: timeLabels,
+            datasets: [{
+              label: 'Humidity over Time',
+              data: humidityLevels,
+              borderColor: 'rgba(255, 206, 86, 1)',
+              fill: false,
+              tension: 0.1
+            }]
+          },
+          options: {
+            scales: {
+              x: {
+                type: 'time',
+                time: {
+                  unit: 'minute'
+                },
+                title: {
+                  display: true,
+                  text: 'Time'
+                }
+              },
+              y: {
+                beginAtZero: false,
+                title: {
+                  display: true,
+                  text: 'Humidity %'
+                }
+              }
+            }
+          }
+        });
+      }
+    }
+  }
+
+  function updateGarageChart() {
+    const dataCount = garageData.length;
+    const minIndex = Math.floor((sliderMin / 100) * dataCount);
+    const maxIndex = Math.floor((sliderMax / 100) * dataCount);
+    const filteredData = garageData.slice(minIndex, maxIndex + 1);
+
+    const garageLevels = filteredData.map((item) => item.garage);
+
+    if (garageChart) {
+      garageChart.data.labels = timeLabels;
+      garageChart.data.datasets[0].data = garageLevels;
+      garageChart.update();
+    } else if (motionGarageCanvas) {
+      const ctx = motionGarageCanvas.getContext('2d');
+      if (ctx) {
+        garageChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: timeLabels,
+            datasets: [{
+              label: 'Garage over Time',
+              data: garageLevels,
+              borderColor: 'rgba(255, 206, 86, 1)',
+              fill: false,
+              tension: 0.1
+            }]
+          },
+          options: {
+            scales: {
+              x: {
+                type: 'time',
+                time: {
+                  unit: 'minute'
+                },
+                title: {
+                  display: true,
+                  text: 'Time'
+                }
+              },
+              y: {
+                beginAtZero: false,
+                title: {
+                  display: true,
+                  text: 'Motion'
+                }
+              }
+            }
+          }
+        });
+      }
+    }
+  }
+
+  function updateBathroomChart() {
+    const dataCount = bathroomData.length;
+    const minIndex = Math.floor((sliderMin / 100) * dataCount);
+    const maxIndex = Math.floor((sliderMax / 100) * dataCount);
+    const filteredData = bathroomData.slice(minIndex, maxIndex + 1);
+
+    const bathroomLevels = filteredData.map((item) => item.bathroom);
+
+    if (bathroomChart) {
+      bathroomChart.data.labels = timeLabels;
+      bathroomChart.data.datasets[0].data = bathroomLevels;
+      bathroomChart.update();
+    } else if (motionBathroomCanvas) {
+      const ctx = motionBathroomCanvas.getContext('2d');
+      if (ctx) {
+        garageChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: timeLabels,
+            datasets: [{
+              label: 'Bathroom over Time',
+              data: bathroomLevels,
+              borderColor: 'rgba(255, 206, 86, 1)',
+              fill: false,
+              tension: 0.1
+            }]
+          },
+          options: {
+            scales: {
+              x: {
+                type: 'time',
+                time: {
+                  unit: 'minute'
+                },
+                title: {
+                  display: true,
+                  text: 'Time'
+                }
+              },
+              y: {
+                beginAtZero: false,
+                title: {
+                  display: true,
+                  text: 'Motion'
+                }
+              }
+            }
+          }
+        });
+      }
+    }
+  }
+
+  function updateBedroomChart() {
+    const dataCount = bedroomData.length;
+    const minIndex = Math.floor((sliderMin / 100) * dataCount);
+    const maxIndex = Math.floor((sliderMax / 100) * dataCount);
+    const filteredData = bedroomData.slice(minIndex, maxIndex + 1);
+
+    const bedroomLevels = filteredData.map((item) => item.bedroom);
+
+    if (bedroomChart) {
+      bedroomChart.data.labels = timeLabels;
+      bedroomChart.data.datasets[0].data = bedroomLevels;
+      bedroomChart.update();
+    } else if (motionBedroomCanvas) {
+      const ctx = motionBedroomCanvas.getContext('2d');
+      if (ctx) {
+        garageChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: timeLabels,
+            datasets: [{
+              label: 'Bathroom over Time',
+              data: bedroomLevels,
+              borderColor: 'rgba(255, 206, 86, 1)',
+              fill: false,
+              tension: 0.1
+            }]
+          },
+          options: {
+            scales: {
+              x: {
+                type: 'time',
+                time: {
+                  unit: 'minute'
+                },
+                title: {
+                  display: true,
+                  text: 'Time'
+                }
+              },
+              y: {
+                beginAtZero: false,
+                title: {
+                  display: true,
+                  text: 'Motion'
+                }
+              }
+            }
+          }
+        });
+      }
+    }
+  }
+
+  function updateLRChart() {
+    const dataCount = lrData.length;
+    const minIndex = Math.floor((sliderMin / 100) * dataCount);
+    const maxIndex = Math.floor((sliderMax / 100) * dataCount);
+    const filteredData = lrData.slice(minIndex, maxIndex + 1);
+
+    const lrLevels = filteredData.map((item) => item.lr);
+
+    if (lrChart) {
+      lrChart.data.labels = timeLabels;
+      lrChart.data.datasets[0].data = lrLevels;
+      lrChart.update();
+    } else if (motionLRCanvas) {
+      const ctx = motionLRCanvas.getContext('2d');
+      if (ctx) {
+        garageChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: timeLabels,
+            datasets: [{
+              label: 'LR over Time',
+              data: lrLevels,
+              borderColor: 'rgba(255, 206, 86, 1)',
+              fill: false,
+              tension: 0.1
+            }]
+          },
+          options: {
+            scales: {
+              x: {
+                type: 'time',
+                time: {
+                  unit: 'minute'
+                },
+                title: {
+                  display: true,
+                  text: 'Time'
+                }
+              },
+              y: {
+                beginAtZero: false,
+                title: {
+                  display: true,
+                  text: 'Motion'
                 }
               }
             }
@@ -245,10 +624,20 @@
     fetchTemperatureData();
     fetchPressureData();
     fetchIrradianceData();
+    fetchHumidityData();
+    fetchGarageData();
+    fetchBathroomData();
+    fetchBedroomData();
+    fetchLRata();
     const interval = setInterval(() => {
       fetchTemperatureData();
       fetchPressureData();
       fetchIrradianceData();
+      fetchHumidityData();
+      fetchGarageData();
+      fetchBathroomData();
+      fetchBedroomData();
+      fetchLRata();
     }, 10000); // Update every 10 seconds
 
     onDestroy(() => {
@@ -258,8 +647,7 @@
 </script>
 
 <main>
-  <h1>Historian</h1>
-  
+  <!-- <h1>Historian</h1> -->
   <div class="charts-container">
     <div class="chart">
       <h2>Temperature Data</h2>
@@ -276,6 +664,35 @@
     <div class="chart">
       <h2>Irradiance Data</h2>
       <canvas bind:this={irradianceCanvas} width="300" height="150"></canvas>
+    </div>
+
+    <div class="chart">
+      <h2>Humidity Data</h2>
+      <canvas bind:this={humidityCanvas} width="300" height="150"></canvas>
+    </div>
+  </div>
+
+  <div class="charts-container">
+    <div class="chart">
+      <h2>Garage Data</h2>
+      <canvas bind:this={motionGarageCanvas} width="300" height="150"></canvas>
+    </div>
+
+    <div class="chart">
+      <h2>Bathroom Data</h2>
+      <canvas bind:this={motionBathroomCanvas} width="300" height="150"></canvas>
+    </div>
+  </div>
+
+  <div class="charts-container">
+    <div class="chart">
+      <h2>Bedroom Data</h2>
+      <canvas bind:this={motionBedroomCanvas} width="300" height="150"></canvas>
+    </div>
+
+    <div class="chart">
+      <h2>LR Data</h2>
+      <canvas bind:this={motionLRCanvas} width="300" height="150"></canvas>
     </div>
   </div>
 
