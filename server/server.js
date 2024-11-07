@@ -12,98 +12,48 @@ app.use(express.json());
 // Initialize database
 const db = new Database('./database/testDB.db');
 
-// Route to fetch irradiance data
-app.get('/irradiance', (req, res) => {
+// Route to fetch all data
+app.get('/allData', (req, res) => {
   try {
-    const data = db.prepare('SELECT timestamp, irradiance FROM irradiance_data').all();
-    console.log(data);
-    res.json(data);
+    const temperatureData = db.prepare('SELECT timestamp, temperature FROM temperature_data').all();
+    const pressureData = db.prepare('SELECT timestamp, pressure FROM pressure_data').all();
+    const irradianceData = db.prepare('SELECT timestamp, irradiance FROM irradiance_data').all();
+    const humidityData = db.prepare('SELECT timestamp, humidity FROM humidity_data').all();
+    const garageData = db.prepare('SELECT timestamp, garage FROM garage_data').all();
+    const bathroomData = db.prepare('SELECT timestamp, bathroom FROM bathroom_data').all();
+    const bedroomData = db.prepare('SELECT timestamp, bedroom FROM bedroom_data').all();
+    const lrData = db.prepare('SELECT timestamp, lr FROM lr_data').all();
+
+    res.json({
+      temperatureData,
+      pressureData,
+      irradianceData,
+      humidityData,
+      garageData,
+      bathroomData,
+      bedroomData,
+      lrData
+    });
   } catch (error) {
-    console.error('Error fetching irradiance data:', error);
+    console.error('Error fetching all data:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
-// Route to fetch pressure data
-app.get('/pressure', (req, res) => {
+app.get('/deleteAllData', (req, res) => {
   try {
-    const data = db.prepare('SELECT timestamp, pressure FROM pressure_data').all();
-    console.log(data);
-    res.json(data);
-  } catch (error) {
-    console.error('Error fetching pressure data:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
+    db.prepare('DELETE FROM temperature_data').run();
+    db.prepare('DELETE FROM pressure_data').run();
+    db.prepare('DELETE FROM irradiance_data').run();
+    db.prepare('DELETE FROM humidity_data').run();
+    db.prepare('DELETE FROM garage_data').run();
+    db.prepare('DELETE FROM bathroom_data').run();
+    db.prepare('DELETE FROM bedroom_data').run();
+    db.prepare('DELETE FROM lr_data').run();
 
-// Route to fetch temperature data
-app.get('/temperature', (req, res) => {
-  try {
-    const data = db.prepare('SELECT timestamp, temperature FROM temperature_data').all();
-    console.log(data);
-    res.json(data);
+    res.json({ message: 'All data deleted successfully from all tables.' });
   } catch (error) {
-    console.error('Error fetching temperature data:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
-// Route to fetch humidity data
-app.get('/humidity', (req, res) => {
-  try {
-    const data = db.prepare('SELECT timestamp, humidity FROM humidity_data').all();
-    console.log(data);
-    res.json(data);
-  } catch (error) {
-    console.error('Error fetching humidity data:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
-// Route to fetch garage data
-app.get('/garage', (req, res) => {
-  try {
-    const data = db.prepare('SELECT timestamp, garage FROM garage_data').all();
-    console.log(data);
-    res.json(data);
-  } catch (error) {
-    console.error('Error fetching garage data:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
-// Route to fetch bathroom data
-app.get('/bathroom', (req, res) => {
-  try {
-    const data = db.prepare('SELECT timestamp, bathroom FROM bathroom_data').all();
-    console.log(data);
-    res.json(data);
-  } catch (error) {
-    console.error('Error fetching bathroom data:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
-// Route to fetch bedroom data
-app.get('/bedroom', (req, res) => {
-  try {
-    const data = db.prepare('SELECT timestamp, bedroom FROM bedroom_data').all();
-    console.log(data);
-    res.json(data);
-  } catch (error) {
-    console.error('Error fetching bedroom data:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
-// Route to fetch lr data
-app.get('/lr', (req, res) => {
-  try {
-    const data = db.prepare('SELECT timestamp, lr FROM lr_data').all();
-    console.log(data);
-    res.json(data);
-  } catch (error) {
-    console.error('Error fetching lr data:', error);
+    console.error('Error deleting all data:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });

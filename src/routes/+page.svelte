@@ -5,193 +5,88 @@
 
   // Charts
   let temperatureChart: Chart | null = null;
-  let pressureChart: Chart | null = null;
-  let irradianceChart: Chart | null = null;
-  let humidityChart: Chart | null = null;
-  let garageChart: Chart | null = null;
-  let bathroomChart: Chart | null = null;
-  let bedroomChart: Chart | null = null;
-  let lrChart: Chart | null = null;
+  let pressureChart:    Chart | null = null;
+  let irradianceChart:  Chart | null = null;
+  let humidityChart:    Chart | null = null;
+  let garageChart:      Chart | null = null;
+  let bathroomChart:    Chart | null = null;
+  let bedroomChart:     Chart | null = null;
+  let lrChart:          Chart | null = null;
 
   // Data
-  let irradianceData: { timestamp: string, irradiance: number }[] = [];
+  let irradianceData:  { timestamp: string, irradiance: number }[] = [];
   let temperatureData: { timestamp: string, temperature: number }[] = [];
-  let pressureData: { timestamp: string, pressure: number }[] = [];
-  let humidityData: { timestamp: string, humidity: number }[] = [];
-  let garageData: { timestamp: string, garage: number }[] = [];
-  let bathroomData: { timestamp: string, bathroom: number }[] = [];
-  let bedroomData: { timestamp: string, bedroom: number }[] = [];
-  let lrData: { timestamp: string, lr: number }[] = [];
+  let pressureData:    { timestamp: string, pressure: number }[] = [];
+  let humidityData:    { timestamp: string, humidity: number }[] = [];
+  let garageData:      { timestamp: string, garage: number }[] = [];
+  let bathroomData:    { timestamp: string, bathroom: number }[] = [];
+  let bedroomData:     { timestamp: string, bedroom: number }[] = [];
+  let lrData:          { timestamp: string, lr: number }[] = [];
 
   // Time labels
   let timeLabels: string[] = [];
 
   // Canvas
-  let tempCanvas: HTMLCanvasElement | null = null;
-  let pressureCanvas: HTMLCanvasElement | null = null;
-  let irradianceCanvas: HTMLCanvasElement | null = null;
-  let humidityCanvas: HTMLCanvasElement | null = null;
-  let motionGarageCanvas: HTMLCanvasElement | null = null;
+  let tempCanvas:           HTMLCanvasElement | null = null;
+  let pressureCanvas:       HTMLCanvasElement | null = null;
+  let irradianceCanvas:     HTMLCanvasElement | null = null;
+  let humidityCanvas:       HTMLCanvasElement | null = null;
+  let motionGarageCanvas:   HTMLCanvasElement | null = null;
   let motionBathroomCanvas: HTMLCanvasElement | null = null;
-  let motionBedroomCanvas: HTMLCanvasElement | null = null;
-  let motionLRCanvas: HTMLCanvasElement | null = null;
-
-  // Add Humidity, Motion sensor garage, bathroom, bedroom, LR
+  let motionBedroomCanvas:  HTMLCanvasElement | null = null;
+  let motionLRCanvas:       HTMLCanvasElement | null = null;
 
   // Slider values representing the range of data to display
   let sliderMin = 0;
   let sliderMax = 100;
 
-  // Fetch temperature data
-  async function fetchTemperatureData() {
+  function sortByTimestamp(data: any[]) {
+    return data.sort((a: { timestamp: string | number | Date; }, b: { timestamp: string | number | Date; }) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+  }
+
+  // Fetch all data
+  async function fetchAllData() {
     try {
-      const response = await fetch('http://localhost:3000/temperature');
+      const response = await fetch('http://localhost:3000/allData');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      
-      temperatureData = data.sort((a: { timestamp: string }, b: { timestamp: string }) => 
-        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-      );
 
+      // Assigning data to each chart variable
+      temperatureData = sortByTimestamp(data.temperatureData);
+      pressureData = sortByTimestamp(data.pressureData);
+      irradianceData = sortByTimestamp(data.irradianceData);
+      humidityData = sortByTimestamp(data.humidityData);
+      garageData = sortByTimestamp(data.garageData);
+      bathroomData = sortByTimestamp(data.bathroomData);
+      bedroomData = sortByTimestamp(data.bedroomData);
+      lrData = sortByTimestamp(data.lrData);
+
+      // Update charts
       updateTemperatureChart();
-    } catch (error) {
-      console.error('Error fetching temperature data:', error);
-    }
-  }
-
-  // Fetch pressure data
-  async function fetchPressureData() {
-    try {
-      const response = await fetch('http://localhost:3000/pressure');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      
-      pressureData = data.sort((a: { timestamp: string }, b: { timestamp: string }) => 
-        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-      );
-
       updatePressureChart();
-    } catch (error) {
-      console.error('Error fetching pressure data:', error);
-    }
-  }
-
-  // Fetch irradiance
-  async function fetchIrradianceData() {
-    try {
-      const response = await fetch('http://localhost:3000/irradiance');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      
-      irradianceData = data.sort((a: { timestamp: string }, b: { timestamp: string }) => 
-        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-      );
-
       updateIrradianceChart();
-    } catch (error) {
-      console.error('Error fetching temperature data:', error);
-    }
-  }
-
-  // Fetch humidity data
-  async function fetchHumidityData() {
-    try {
-      const response = await fetch('http://localhost:3000/humidity');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      
-      humidityData = data.sort((a: { timestamp: string }, b: { timestamp: string }) => 
-        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-      );
-
       updateHumidityChart();
-    } catch (error) {
-      console.error('Error fetching humidity data:', error);
-    }
-  }
-
-  // Fetch garage data
-  async function fetchGarageData() {
-    try {
-      const response = await fetch('http://localhost:3000/garage');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      
-      garageData = data.sort((a: { timestamp: string }, b: { timestamp: string }) => 
-        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-      );
-
       updateGarageChart();
-    } catch (error) {
-      console.error('Error fetching garage data:', error);
-    }
-  }
-
-  // Fetch bathroom data
-  async function fetchBathroomData() {
-    try {
-      const response = await fetch('http://localhost:3000/bathroom');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      
-      bathroomData = data.sort((a: { timestamp: string }, b: { timestamp: string }) => 
-        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-      );
-
       updateBathroomChart();
-    } catch (error) {
-      console.error('Error fetching bathroom data:', error);
-    }
-  }
-
-  // Fetch bathroom data
-  async function fetchBedroomData() {
-    try {
-      const response = await fetch('http://localhost:3000/bedroom');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      
-      bedroomData = data.sort((a: { timestamp: string }, b: { timestamp: string }) => 
-        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-      );
-
       updateBedroomChart();
+      updateLRChart();
+
     } catch (error) {
-      console.error('Error fetching bedroom data:', error);
+      console.error('Error fetching all data:', error);
     }
   }
 
-  // Fetch lr data
-  async function fetchLRata() {
-    try {
-      const response = await fetch('http://localhost:3000/lr');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      
-      lrData = data.sort((a: { timestamp: string }, b: { timestamp: string }) => 
-        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-      );
-
-      updateLRChart();
-    } catch (error) {
-      console.error('Error fetching lr data:', error);
-    }
+  function updateCharts() {
+    updateTemperatureChart();
+    updatePressureChart();
+    updateIrradianceChart();
+    updateHumidityChart();
+    updateGarageChart();
+    updateBathroomChart();
+    updateBedroomChart();
+    updateLRChart();
   }
 
   function updateTemperatureChart() {
@@ -621,23 +516,9 @@
 
   onMount(() => {
     document.title = "Historian";
-    fetchTemperatureData();
-    fetchPressureData();
-    fetchIrradianceData();
-    fetchHumidityData();
-    fetchGarageData();
-    fetchBathroomData();
-    fetchBedroomData();
-    fetchLRata();
+    fetchAllData();
     const interval = setInterval(() => {
-      fetchTemperatureData();
-      fetchPressureData();
-      fetchIrradianceData();
-      fetchHumidityData();
-      fetchGarageData();
-      fetchBathroomData();
-      fetchBedroomData();
-      fetchLRata();
+      fetchAllData();
     }, 10000); // Update every 10 seconds
 
     onDestroy(() => {
@@ -704,7 +585,7 @@
         min="0" 
         max="100" 
         bind:value={sliderMin} 
-        on:change={() => { updateTemperatureChart(); updatePressureChart(); updateIrradianceChart(); }} 
+        on:change={() => { updateCharts(); }}
       />
     </label>
     <label>
@@ -714,7 +595,7 @@
         min="0" 
         max="100" 
         bind:value={sliderMax} 
-        on:change={() => { updateTemperatureChart(); updatePressureChart(); updateIrradianceChart(); }} 
+        on:change={() => { updateCharts(); }}
       />
     </label>
   </div>
@@ -725,10 +606,6 @@
     font-family: Arial, sans-serif;
     text-align: center;
     padding: 2rem;
-  }
-
-  h1 {
-    color: #333;
   }
 
   h2 {
