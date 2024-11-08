@@ -322,7 +322,7 @@
           data: {
             labels: timeLabels,
             datasets: [{
-              label: 'Garage over Time',
+              label: 'Garage movement over Time',
               data: garageLevels,
               borderColor: 'rgba(255, 206, 86, 1)',
               fill: false,
@@ -370,7 +370,7 @@
     } else if (motionBathroomCanvas) {
       const ctx = motionBathroomCanvas.getContext('2d');
       if (ctx) {
-        garageChart = new Chart(ctx, {
+        bathroomChart = new Chart(ctx, {
           type: 'line',
           data: {
             labels: timeLabels,
@@ -423,7 +423,7 @@
     } else if (motionBedroomCanvas) {
       const ctx = motionBedroomCanvas.getContext('2d');
       if (ctx) {
-        garageChart = new Chart(ctx, {
+        bedroomChart = new Chart(ctx, {
           type: 'line',
           data: {
             labels: timeLabels,
@@ -476,7 +476,7 @@
     } else if (motionLRCanvas) {
       const ctx = motionLRCanvas.getContext('2d');
       if (ctx) {
-        garageChart = new Chart(ctx, {
+        lrChart = new Chart(ctx, {
           type: 'line',
           data: {
             labels: timeLabels,
