@@ -78,6 +78,9 @@ def add_random_data():
   add_bedroom_data(bedroom, timestamp)
   add_lr_data(lr, timestamp)
 
+# def write_to_holding_register(client, register_address, value):
+  # client.write_register(register_address, value)
+
 def read_sensor_file(file_path, scenario_name):
   sensors = {}
   start_reading = False
@@ -156,6 +159,8 @@ def simulate_sensors(file_path):
             values_at_index.append(sensor_values[i])
         
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        # Database
         add_humidity_data(values_at_index[0], timestamp)
         add_temperature_data(values_at_index[1], timestamp)
         add_irradiance_data(values_at_index[2], timestamp)
@@ -164,7 +169,16 @@ def simulate_sensors(file_path):
         add_bathroom_data(values_at_index[5], timestamp)
         add_bedroom_data(values_at_index[6], timestamp)
         add_lr_data(values_at_index[7], timestamp)
-        # write_to_holding_register(client, sensor_registers[sensor_name], value)
+
+        # Registers
+        # write_to_holding_register(client, sensor_registers['Humidity'], value)
+        # write_to_holding_register(client, sensor_registers['Temperature'], value)
+        # write_to_holding_register(client, sensor_registers['SunRadiation'], value)
+        # write_to_holding_register(client, sensor_registers['Pressure'], value)
+        # write_to_holding_register(client, sensor_registers['Motion_Sensor_Garage'], value)
+        # write_to_holding_register(client, sensor_registers['Motion_Sensor_Bathroom'], value)
+        # write_to_holding_register(client, sensor_registers['Motion_Sensor_Bedroom'], value)
+        # write_to_holding_register(client, sensor_registers['Motion_Sensor_LR'], value)
 
         print("-" * 30)
         data_count += 1
@@ -185,7 +199,6 @@ if __name__ == "__main__":
   file_path = "Sensor_data"
   # client = ModbusTcpClient('100.108.218.111', port=502)
   sensor_registers = {
-    'Barometer': 1027,
     'Humidity': 1028,
     'Motion_Sensor_Garage': 1029,
     'Temperature': 1025,
