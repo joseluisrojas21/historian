@@ -1,5 +1,5 @@
 import express from 'express';
-import Database from 'better-sqlite3'; // Ensure you're using the correct import for your DB
+import Database from 'better-sqlite3';
 import cors from 'cors';
 
 const app = express();
@@ -16,13 +16,13 @@ const db = new Database('./database/testDB.db');
 app.get('/allData', (req, res) => {
   try {
     const temperatureData = db.prepare('SELECT timestamp, temperature FROM temperature_data').all();
-    const pressureData = db.prepare('SELECT timestamp, pressure FROM pressure_data').all();
-    const irradianceData = db.prepare('SELECT timestamp, irradiance FROM irradiance_data').all();
-    const humidityData = db.prepare('SELECT timestamp, humidity FROM humidity_data').all();
-    const garageData = db.prepare('SELECT timestamp, garage FROM garage_data').all();
-    const bathroomData = db.prepare('SELECT timestamp, bathroom FROM bathroom_data').all();
-    const bedroomData = db.prepare('SELECT timestamp, bedroom FROM bedroom_data').all();
-    const lrData = db.prepare('SELECT timestamp, lr FROM lr_data').all();
+    const pressureData    = db.prepare('SELECT timestamp, pressure FROM pressure_data').all();
+    const irradianceData  = db.prepare('SELECT timestamp, irradiance FROM irradiance_data').all();
+    const humidityData    = db.prepare('SELECT timestamp, humidity FROM humidity_data').all();
+    const garageData      = db.prepare('SELECT timestamp, garage FROM garage_data').all();
+    const bathroomData    = db.prepare('SELECT timestamp, bathroom FROM bathroom_data').all();
+    const bedroomData     = db.prepare('SELECT timestamp, bedroom FROM bedroom_data').all();
+    const lrData          = db.prepare('SELECT timestamp, lr FROM lr_data').all();
 
     res.json({
       temperatureData,
