@@ -41,13 +41,14 @@
   let sliderMax = 100;
 
   function sortByTimestamp(data: any[]) {
-    return data.sort((a: { timestamp: string | number | Date; }, b: { timestamp: string | number | Date; }) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+    return data.sort(( a: { timestamp: string | number | Date; }, b: { timestamp: string | number | Date; }) =>
+    new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
   }
 
   // Fetch all data
   async function fetchAllData() {
     try {
-      const response = await fetch('http://localhost:3000/allData');
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/allData`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -64,14 +65,7 @@
       lrData = sortByTimestamp(data.lrData);
 
       // Update charts
-      updateTemperatureChart();
-      updatePressureChart();
-      updateIrradianceChart();
-      updateHumidityChart();
-      updateGarageChart();
-      updateBathroomChart();
-      updateBedroomChart();
-      updateLRChart();
+      updateCharts();
 
     } catch (error) {
       console.error('Error fetching all data:', error);
