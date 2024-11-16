@@ -2,10 +2,10 @@ import sqlite3
 import random
 import time
 from datetime import datetime
-# from pymodbus.client import ModbusTcpClient
+from pymodbus.client import ModbusTcpClient
 
 # Connect to the SQLite database
-db_file = 'testDB.db'
+db_file = '/var/www/historian/database/testDB.db'
 conn = sqlite3.connect(db_file)
 cursor = conn.cursor()
 
@@ -78,8 +78,18 @@ def add_random_data():
   add_bedroom_data(bedroom, timestamp)
   add_lr_data(lr, timestamp)
 
-# def write_to_holding_register(client, register_address, value):
-  # client.write_register(register_address, value)
+  write_to_holding_register(client, sensor_registers['Humidity'],               humidity)
+  write_to_holding_register(client, sensor_registers['Temperature'],            temperature)
+  write_to_holding_register(client, sensor_registers['SunRadiation'],           irradiance)
+  write_to_holding_register(client, sensor_registers['Pressure'],               pressure)
+  write_to_holding_register(client, sensor_registers['Motion_Sensor_Garage'],   garage)
+  write_to_holding_register(client, sensor_registers['Motion_Sensor_Bathroom'], bathroom)
+  write_to_holding_register(client, sensor_registers['Motion_Sensor_Bedroom'],  bedroom)
+  write_to_holding_register(client, sensor_registers['Motion_Sensor_LR'],       lr)
+
+def write_to_holding_register(client, register_address, value):
+  int_value = int(value)
+  client.write_register(register_address, int_value)
 
 def read_sensor_file(file_path, scenario_name):
   sensors = {}
@@ -161,24 +171,24 @@ def simulate_sensors(file_path):
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         # Database
-        add_humidity_data(values_at_index[0], timestamp)
+        add_humidity_data(values_at_index[0],    timestamp)
         add_temperature_data(values_at_index[1], timestamp)
-        add_irradiance_data(values_at_index[2], timestamp)
-        add_pressure_data(values_at_index[3], timestamp)
-        add_garage_data(values_at_index[4], timestamp)
-        add_bathroom_data(values_at_index[5], timestamp)
-        add_bedroom_data(values_at_index[6], timestamp)
-        add_lr_data(values_at_index[7], timestamp)
+        add_irradiance_data(values_at_index[2],  timestamp)
+        add_pressure_data(values_at_index[3],    timestamp)
+        add_garage_data(values_at_index[4],      timestamp)
+        add_bathroom_data(values_at_index[5],    timestamp)
+        add_bedroom_data(values_at_index[6],     timestamp)
+        add_lr_data(values_at_index[7],          timestamp)
 
         # Registers
-        # write_to_holding_register(client, sensor_registers['Humidity'], value)
-        # write_to_holding_register(client, sensor_registers['Temperature'], value)
-        # write_to_holding_register(client, sensor_registers['SunRadiation'], value)
-        # write_to_holding_register(client, sensor_registers['Pressure'], value)
-        # write_to_holding_register(client, sensor_registers['Motion_Sensor_Garage'], value)
-        # write_to_holding_register(client, sensor_registers['Motion_Sensor_Bathroom'], value)
-        # write_to_holding_register(client, sensor_registers['Motion_Sensor_Bedroom'], value)
-        # write_to_holding_register(client, sensor_registers['Motion_Sensor_LR'], value)
+        write_to_holding_register(client, sensor_registers['Humidity'],               values_at_index[0])
+        write_to_holding_register(client, sensor_registers['Temperature'],            values_at_index[1])
+        write_to_holding_register(client, sensor_registers['SunRadiation'],           values_at_index[2])
+        write_to_holding_register(client, sensor_registers['Pressure'],               values_at_index[3])
+        write_to_holding_register(client, sensor_registers['Motion_Sensor_Garage'],   values_at_index[4])
+        write_to_holding_register(client, sensor_registers['Motion_Sensor_Bathroom'], values_at_index[5])
+        write_to_holding_register(client, sensor_registers['Motion_Sensor_Bedroom'],  values_at_index[6])
+        write_to_holding_register(client, sensor_registers['Motion_Sensor_LR'],       values_at_index[7])
 
         print("-" * 30)
         data_count += 1
@@ -197,7 +207,7 @@ def simulate_sensors(file_path):
 
 if __name__ == "__main__":
   file_path = "Sensor_data"
-  # client = ModbusTcpClient('100.108.218.111', port=502)
+  client = ModbusTcpClient('100.108.218.111', port=502)
   sensor_registers = {
     'Humidity': 1028,
     'Motion_Sensor_Garage': 1029,
@@ -212,5 +222,5 @@ if __name__ == "__main__":
   simulate_sensors(file_path)
 
 # Close the database connection
-# cursor.close()
-# conn.close()
+cursor.close()
+conn.close()
