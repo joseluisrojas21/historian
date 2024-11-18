@@ -10,8 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 // Initialize database
-// 
-const db = new Database(`${import.meta.env.VITE_DATABASE_LOCATION}`);
+const db = new Database('./database/testDB.db');
 
 // Route to fetch all data
 app.get('/allData', (req, res) => {
