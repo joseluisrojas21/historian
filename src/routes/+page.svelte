@@ -508,6 +508,14 @@
     }
   }
 
+  let logs = [
+    { event: "Temperature Rise", time: "2024-11-18 08:00", description: "Temperature exceeded threshold." },
+    { event: "Pressure Drop", time: "2024-11-18 09:30", description: "Pressure level dropped below minimum." },
+    { event: "Irradiance Spike", time: "2024-11-18 10:15", description: "Irradiance level spiked." },
+    { event: "Motion Detected (Garage)", time: "2024-11-18 11:00", description: "Motion sensor triggered in the garage." },
+    { event: "Humidity Increase", time: "2024-11-18 12:45", description: "Humidity level increased beyond normal range." },
+  ];
+
   onMount(() => {
     document.title = "Historian";
     fetchAllData();
@@ -566,7 +574,7 @@
     </div>
 
     <div class="chart">
-      <h2>LR Data</h2>
+      <h2>Leaving Room Data</h2>
       <canvas bind:this={motionLRCanvas} width="300" height="150"></canvas>
     </div>
   </div>
@@ -593,6 +601,29 @@
       />
     </label>
   </div>
+
+  <!-- Event Log Table Section -->
+  <section>
+    <h2>Event Log</h2>
+    <table class="event-log">
+      <thead>
+        <tr>
+          <th>Event</th>
+          <th>Time</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        {#each logs as log}
+          <tr>
+            <td>{log.event}</td>
+            <td>{log.time}</td>
+            <td>{log.description}</td>
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+  </section>
 </main>
 
 <style>
@@ -637,5 +668,33 @@
 
   input[type="range"] {
     width: 150px;
+  }
+
+  section {
+    margin-top: 2rem;
+  }
+
+  table.event-log {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+
+  table.event-log th, table.event-log td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+
+  table.event-log th {
+    background-color: #f4f4f4;
+  }
+
+  table.event-log tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  table.event-log tr:hover {
+    background-color: #f1f1f1;
   }
 </style>
