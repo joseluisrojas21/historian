@@ -95,6 +95,32 @@
     } catch (error) {
       console.error('Error fetching all data:', error);
     }
+  }
+
+  async function handleDeleteConfirmation() {
+  // Ask the user to confirm the deletion
+  const userConfirmed = window.confirm('Are you sure you want to delete all data? This action cannot be undone.');
+
+  if (userConfirmed) {
+    // If the user confirms, proceed to delete all data
+    await deleteAllData();
+    // After deletion, refresh the page
+    window.location.reload();
+  }
+}
+
+async function deleteAllData() {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/deleteAllData`)
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    console.log('All data deleted successfully.');
+  } catch (error) {
+    console.error('Error fetching all data:', error);
+  }
 }
 
   function updateCharts() {
@@ -533,14 +559,6 @@
     }
   }
 
-  // let logs = [
-  //   { event: "Temperature Rise", time: "2024-11-18 08:00", description: "Temperature exceeded threshold." },
-  //   { event: "Pressure Drop", time: "2024-11-18 09:30", description: "Pressure level dropped below minimum." },
-  //   { event: "Irradiance Spike", time: "2024-11-18 10:15", description: "Irradiance level spiked." },
-  //   { event: "Motion Detected (Garage)", time: "2024-11-18 11:00", description: "Motion sensor triggered in the garage." },
-  //   { event: "Humidity Increase", time: "2024-11-18 12:45", description: "Humidity level increased beyond normal range." },
-  // ];
-
   onMount(() => {
     document.title = "Historian";
     fetchAllData();
@@ -651,6 +669,11 @@
       </tbody>
     </table>
   </section>
+
+  <!-- Button to Delete All Data (For now, just a placeholder) -->
+  <div class="delete-button-container">
+    <button on:click={handleDeleteConfirmation}>Delete All Data</button>
+  </div>
 </main>
 
 <style>
@@ -723,5 +746,23 @@
 
   table.event-log tr:hover {
     background-color: #f1f1f1;
+  }
+
+  .delete-button-container {
+    margin-top: 2rem;
+  }
+
+  .delete-button-container button {
+    background-color: #e74c3c;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+
+  .delete-button-container button:hover {
+    background-color: #c0392b;
   }
 </style>
