@@ -5,7 +5,8 @@ from datetime import datetime
 from pymodbus.client import ModbusTcpClient
 
 # Connect to the SQLite database
-db_file = '/var/www/historian/database/testDB.db'
+# db_file = '/var/www/historian/database/testDB.db'
+db_file = 'testDB.db'
 conn = sqlite3.connect(db_file)
 cursor = conn.cursor()
 
@@ -57,6 +58,29 @@ def add_lr_data(lr, timestamp):
   conn.commit()
   print(f"Added lr data: {timestamp} - {lr}")
 
+def addLog(coils, timestamp):
+  descriptions = [
+    ("Fan", "The fan turned on"),
+    ("Sunny", "The weather is sunny"),
+    ("Storm", "A storm is occurring"),
+    ("Dehumidifier", "The dehumidifier turned on"),
+    ("Garage Lightbulb", "The garage lightbulb turned on"),
+    ("Bedroom Lightbulb", "The bedroom lightbulb turned on"),
+    ("Bathroom Lightbulb", "The bathroom lightbulb turned on"),
+    ("Living Room Lightbulb", "The living room lightbulb turned on"),
+    ("Tornado", "A tornado is approaching"),
+    ("Alarm Light", "The alarm light turned on because of the tornado"),
+    ("Snowing", "It is snowing"),
+    ("Heater", "The heater turned on")
+  ]
+
+  for address, coil in enumerate(coils):
+    if coil:
+      event, description = descriptions[address]
+      cursor.execute('''INSERT INTO logs (event, timestamp, description) VALUES (?, ?, ?)''', (event, timestamp, description))
+  
+  conn.commit()
+
 def add_random_data():
   timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
@@ -79,6 +103,9 @@ def add_random_data():
   write_to_holding_register(client, sensor_registers['Motion_Sensor_LR'],       lr)
 
   read_and_save_data()
+  
+  coils = read_from_coils(client, 0, 12)
+  addLog(coils, timestamp)
 
 def write_to_holding_register(client, register_address, value):
   int_value = int(value)
@@ -207,6 +234,9 @@ def simulate_sensors(file_path):
 
         # Database
         read_and_save_data()
+
+        coils = read_from_coils(client, 0, 12)
+        addLog(coils, timestamp)
 
         print("-" * 30)
         data_count += 1
