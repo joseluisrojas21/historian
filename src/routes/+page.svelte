@@ -23,6 +23,9 @@
   let bedroomData:     { timestamp: string, bedroom: number }[] = [];
   let lrData:          { timestamp: string, lr: number }[] = [];
 
+  // Logs
+  let logs: { timestamp: string, event: string, description: string }[] = [];
+
   // Time labels
   let timeLabels: string[] = [];
 
@@ -71,6 +74,54 @@
       console.error('Error fetching all data:', error);
     }
   }
+
+  // Fetch all data
+  async function fetchLogs() {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/allLogs`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data && Array.isArray(data.logs)) {
+        logs = data.logs;
+        console.log(logs);
+      } else {
+        console.error('No logs found in response.');
+      }
+
+    } catch (error) {
+      console.error('Error fetching all data:', error);
+    }
+  }
+
+  async function handleDeleteConfirmation() {
+  // Ask the user to confirm the deletion
+  const userConfirmed = window.confirm('Are you sure you want to delete all data? This action cannot be undone.');
+
+  if (userConfirmed) {
+    // If the user confirms, proceed to delete all data
+    await deleteAllData();
+    // After deletion, refresh the page
+    window.location.reload();
+  }
+}
+
+async function deleteAllData() {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/deleteAllData`)
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    console.log('All data deleted successfully.');
+  } catch (error) {
+    console.error('Error fetching all data:', error);
+  }
+}
 
   function updateCharts() {
     updateTemperatureChart();
@@ -511,8 +562,10 @@
   onMount(() => {
     document.title = "Historian";
     fetchAllData();
+    fetchLogs();
     const interval = setInterval(() => {
       fetchAllData();
+      fetchLogs();
     }, 10000); // Update every 10 seconds
 
     onDestroy(() => {
@@ -566,7 +619,7 @@
     </div>
 
     <div class="chart">
-      <h2>LR Data</h2>
+      <h2>Leaving Room Data</h2>
       <canvas bind:this={motionLRCanvas} width="300" height="150"></canvas>
     </div>
   </div>
@@ -592,6 +645,34 @@
         on:change={() => { updateCharts(); }}
       />
     </label>
+  </div>
+
+  <!-- Event Log Table Section -->
+  <section>
+    <h2>Event Log</h2>
+    <table class="event-log">
+      <thead>
+        <tr>
+          <th>Event</th>
+          <th>Time</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        {#each logs as log}
+          <tr>
+            <td>{log.event}</td>
+            <td>{log.timestamp}</td>
+            <td>{log.description}</td>
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Button to Delete All Data (For now, just a placeholder) -->
+  <div class="delete-button-container">
+    <button on:click={handleDeleteConfirmation}>Delete All Data</button>
   </div>
 </main>
 
@@ -637,5 +718,51 @@
 
   input[type="range"] {
     width: 150px;
+  }
+
+  section {
+    margin-top: 2rem;
+  }
+
+  table.event-log {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+
+  table.event-log th, table.event-log td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+
+  table.event-log th {
+    background-color: #f4f4f4;
+  }
+
+  table.event-log tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  table.event-log tr:hover {
+    background-color: #f1f1f1;
+  }
+
+  .delete-button-container {
+    margin-top: 2rem;
+  }
+
+  .delete-button-container button {
+    background-color: #e74c3c;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+
+  .delete-button-container button:hover {
+    background-color: #c0392b;
   }
 </style>

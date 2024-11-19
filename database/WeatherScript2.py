@@ -2,60 +2,61 @@ import sqlite3
 import random
 import time
 from datetime import datetime
-# from pymodbus.client import ModbusTcpClient
+from pymodbus.client import ModbusTcpClient
 
 # Connect to the SQLite database
-db_file = 'testDB.db'
+db_file = '/var/www/historian/database/testDB.db'
 conn = sqlite3.connect(db_file)
 cursor = conn.cursor()
 
-# Function to add random temperature data
-def add_temperature_data(temperature, timestamp):
-  cursor.execute('''INSERT INTO temperature_data (timestamp, temperature) VALUES (?, ?)''', (timestamp, temperature))
+def insert_data(table, data):
+  query = f"INSERT INTO {table} (timestamp, {table[:-5]}) VALUES (?, ?)"
+  cursor.executemany(query, data)
   conn.commit()
-  print(f"Added temperature data: {timestamp} - {temperature}°C")
+  
+  print(f"Added {table[:-5]} data:")
+  for row in data:
+    timestamp, value = row
+    print(f"  {timestamp} - {value}")
 
-# Function to add random pressure data
-def add_pressure_data(pressure, timestamp):
-  cursor.execute('''INSERT INTO pressure_data (timestamp, pressure) VALUES (?, ?)''', (timestamp, pressure))
-  conn.commit()
-  print(f"Added pressure data: {timestamp} - {pressure} hPa")
+def addLog(coils, timestamp):
+  descriptions = [
+    ("Fan", "The fan turned on"),
+    ("Sunny", "The weather is sunny"),
+    ("Storm", "A storm is occurring"),
+    ("Dehumidifier", "The dehumidifier turned on"),
+    ("Garage Lightbulb", "The garage lightbulb turned on"),
+    ("Bedroom Lightbulb", "The bedroom lightbulb turned on"),
+    ("Bathroom Lightbulb", "The bathroom lightbulb turned on"),
+    ("Living Room Lightbulb", "The living room lightbulb turned on"),
+    ("Tornado", "A tornado is approaching"),
+    ("Alarm Light", "The alarm light turned on because of the tornado"),
+    ("Snowing", "It is snowing"),
+    ("Heater", "The heater turned on")
+  ]
 
-# Function to add random irradiance data
-def add_irradiance_data(irradiance, timestamp):
-  cursor.execute('''INSERT INTO irradiance_data (timestamp, irradiance) VALUES (?, ?)''', (timestamp, irradiance))
+  for address, coil in enumerate(coils):
+    if coil:
+      event, description = descriptions[address]
+      cursor.execute('''INSERT INTO logs (event, timestamp, description) VALUES (?, ?, ?)''', (event, timestamp, description))
+  
   conn.commit()
-  print(f"Added irradiance data: {timestamp} - {irradiance} W/m²")
 
-# Function to add random humidity data
-def add_humidity_data(humidity, timestamp):
-  cursor.execute('''INSERT INTO humidity_data (timestamp, humidity) VALUES (?, ?)''', (timestamp, humidity))
-  conn.commit()
-  print(f"Added humidity data: {timestamp} - {humidity}%")
-
-# Function to add random garage data
-def add_garage_data(garage, timestamp):
-  cursor.execute('''INSERT INTO garage_data (timestamp, garage) VALUES (?, ?)''', (timestamp, garage))
-  conn.commit()
-  print(f"Added garage data: {timestamp} - {garage}")
-
-# Function to add random bathroom data
-def add_bathroom_data(bathroom, timestamp):
-  cursor.execute('''INSERT INTO bathroom_data (timestamp, bathroom) VALUES (?, ?)''', (timestamp, bathroom))
-  conn.commit()
-  print(f"Added bathroom data: {timestamp} - {bathroom}")
-
-# Function to add random bedroom data
-def add_bedroom_data(bedroom, timestamp):
-  cursor.execute('''INSERT INTO bedroom_data (timestamp, bedroom) VALUES (?, ?)''', (timestamp, bedroom))
-  conn.commit()
-  print(f"Added bedroom data: {timestamp} - {bedroom}")
-
-# Function to add random lr data
-def add_lr_data(lr, timestamp):
-  cursor.execute('''INSERT INTO lr_data (timestamp, lr) VALUES (?, ?)''', (timestamp, lr))
-  conn.commit()
-  print(f"Added lr data: {timestamp} - {lr}")
+def createTables():
+    table_creation_queries = [
+        '''CREATE TABLE IF NOT EXISTS temperature_data (id INTEGER PRIMARY KEY, timestamp TEXT NOT NULL, temperature REAL NOT NULL)''',
+        '''CREATE TABLE IF NOT EXISTS pressure_data (id INTEGER PRIMARY KEY, timestamp TEXT NOT NULL, pressure REAL NOT NULL)''',
+        '''CREATE TABLE IF NOT EXISTS irradiance_data (id INTEGER PRIMARY KEY, timestamp TEXT NOT NULL, irradiance REAL NOT NULL)''',
+        '''CREATE TABLE IF NOT EXISTS humidity_data (id INTEGER PRIMARY KEY, timestamp TEXT NOT NULL, humidity REAL NOT NULL)''',
+        '''CREATE TABLE IF NOT EXISTS garage_data (id INTEGER PRIMARY KEY, timestamp TEXT NOT NULL, garage REAL NOT NULL)''',
+        '''CREATE TABLE IF NOT EXISTS bathroom_data (id INTEGER PRIMARY KEY, timestamp TEXT NOT NULL, bathroom REAL NOT NULL)''',
+        '''CREATE TABLE IF NOT EXISTS bedroom_data (id INTEGER PRIMARY KEY, timestamp TEXT NOT NULL, bedroom REAL NOT NULL)''',
+        '''CREATE TABLE IF NOT EXISTS lr_data (id INTEGER PRIMARY KEY, timestamp TEXT NOT NULL, lr REAL NOT NULL)''',
+        '''CREATE TABLE IF NOT EXISTS logs (id INTEGER PRIMARY KEY, event TEXT NOT NULL, timestamp TEXT NOT NULL, description TEXT NOT NULL)'''
+    ]
+    for query in table_creation_queries:
+        cursor.execute(query)
+    conn.commit()
 
 def add_random_data():
   timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -69,17 +70,75 @@ def add_random_data():
   bedroom = random.choice([0, 1])
   lr = random.choice([0, 1])
   
-  add_temperature_data(temperature, timestamp)
-  add_pressure_data(pressure, timestamp)
-  add_irradiance_data(irradiance, timestamp)
-  add_humidity_data(humidity, timestamp)
-  add_garage_data(garage, timestamp)
-  add_bathroom_data(bathroom, timestamp)
-  add_bedroom_data(bedroom, timestamp)
-  add_lr_data(lr, timestamp)
+  write_to_holding_register(client, sensor_registers['Humidity'],               humidity)
+  write_to_holding_register(client, sensor_registers['Temperature'],            temperature)
+  write_to_holding_register(client, sensor_registers['SunRadiation'],           irradiance)
+  write_to_holding_register(client, sensor_registers['Pressure'],               pressure)
+  write_to_holding_register(client, sensor_registers['Motion_Sensor_Garage'],   garage)
+  write_to_holding_register(client, sensor_registers['Motion_Sensor_Bathroom'], bathroom)
+  write_to_holding_register(client, sensor_registers['Motion_Sensor_Bedroom'],  bedroom)
+  write_to_holding_register(client, sensor_registers['Motion_Sensor_LR'],       lr)
 
-# def write_to_holding_register(client, register_address, value):
-  # client.write_register(register_address, value)
+  read_and_save_data()
+
+  coils = read_from_coils(client, 0, 12)
+  addLog(coils, timestamp)
+
+def write_to_holding_register(client, register_address, value):
+  client.write_register(register_address, int(value))
+
+def read_from_holding_register(client, register_address, count=1):
+  # Read 'count' number of holding registers starting from 'register_address'
+  result = client.read_holding_registers(register_address, count)
+  
+  if not result.isError():
+    return result.registers
+  else:
+    print("Error reading holding registers:", result)
+    return None
+
+def read_from_coils(client, coil_address, count=1):
+  # Read 'count' number of coils starting from 'coil_address'
+  result = client.read_coils(coil_address, count)
+  
+  if not result.isError():
+    return result.bits
+  else:
+    print("Error reading coils:", result)
+    return None
+
+def read_and_save_data():
+  # Create tables if they do not exist
+  createTables()
+
+  # Get current timestamp
+  timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+  # Define sensor register mappings
+  sensors = {
+    "temperature_data": ("Temperature", sensor_registers['Temperature']),
+    "pressure_data": ("Pressure", sensor_registers['Pressure']),
+    "irradiance_data": ("SunRadiation", sensor_registers['SunRadiation']),
+    "humidity_data": ("Humidity", sensor_registers['Humidity']),
+    "garage_data": ("Motion_Sensor_Garage", sensor_registers['Motion_Sensor_Garage']),
+    "bathroom_data": ("Motion_Sensor_Bathroom", sensor_registers['Motion_Sensor_Bathroom']),
+    "bedroom_data": ("Motion_Sensor_Bedroom", sensor_registers['Motion_Sensor_Bedroom']),
+    "lr_data": ("Motion_Sensor_LR", sensor_registers['Motion_Sensor_LR']),
+  }
+
+  # Prepare the data for batch insert
+  data_to_insert = []
+
+  for table, (sensor_name, register) in sensors.items():
+    sensor_value = read_from_holding_register(client, register)
+    if sensor_value is not None:
+      data_to_insert.append((table, timestamp, sensor_value[0]))
+
+  # Insert data (batch insert for all sensors)
+  if data_to_insert:
+    # Insert the data into each table
+    for table, timestamp, value in data_to_insert:
+      insert_data(table, [(timestamp, value)])
 
 def read_sensor_file(file_path, scenario_name):
   sensors = {}
@@ -160,25 +219,21 @@ def simulate_sensors(file_path):
         
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-        # Database
-        add_humidity_data(values_at_index[0], timestamp)
-        add_temperature_data(values_at_index[1], timestamp)
-        add_irradiance_data(values_at_index[2], timestamp)
-        add_pressure_data(values_at_index[3], timestamp)
-        add_garage_data(values_at_index[4], timestamp)
-        add_bathroom_data(values_at_index[5], timestamp)
-        add_bedroom_data(values_at_index[6], timestamp)
-        add_lr_data(values_at_index[7], timestamp)
-
         # Registers
-        # write_to_holding_register(client, sensor_registers['Humidity'], value)
-        # write_to_holding_register(client, sensor_registers['Temperature'], value)
-        # write_to_holding_register(client, sensor_registers['SunRadiation'], value)
-        # write_to_holding_register(client, sensor_registers['Pressure'], value)
-        # write_to_holding_register(client, sensor_registers['Motion_Sensor_Garage'], value)
-        # write_to_holding_register(client, sensor_registers['Motion_Sensor_Bathroom'], value)
-        # write_to_holding_register(client, sensor_registers['Motion_Sensor_Bedroom'], value)
-        # write_to_holding_register(client, sensor_registers['Motion_Sensor_LR'], value)
+        write_to_holding_register(client, sensor_registers['Humidity'],               values_at_index[0])
+        write_to_holding_register(client, sensor_registers['Temperature'],            values_at_index[1])
+        write_to_holding_register(client, sensor_registers['SunRadiation'],           values_at_index[2])
+        write_to_holding_register(client, sensor_registers['Pressure'],               values_at_index[3])
+        write_to_holding_register(client, sensor_registers['Motion_Sensor_Garage'],   values_at_index[4])
+        write_to_holding_register(client, sensor_registers['Motion_Sensor_Bathroom'], values_at_index[5])
+        write_to_holding_register(client, sensor_registers['Motion_Sensor_Bedroom'],  values_at_index[6])
+        write_to_holding_register(client, sensor_registers['Motion_Sensor_LR'],       values_at_index[7])
+
+        # Database
+        read_and_save_data()
+
+        coils = read_from_coils(client, 0, 12)
+        addLog(coils, timestamp)
 
         print("-" * 30)
         data_count += 1
@@ -197,7 +252,7 @@ def simulate_sensors(file_path):
 
 if __name__ == "__main__":
   file_path = "Sensor_data"
-  # client = ModbusTcpClient('100.108.218.111', port=502)
+  client = ModbusTcpClient('100.108.218.111', port=502)
   sensor_registers = {
     'Humidity': 1028,
     'Motion_Sensor_Garage': 1029,
@@ -212,5 +267,5 @@ if __name__ == "__main__":
   simulate_sensors(file_path)
 
 # Close the database connection
-# cursor.close()
-# conn.close()
+cursor.close()
+conn.close()

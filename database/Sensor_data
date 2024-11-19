@@ -10,7 +10,6 @@
 'Motion_Sensor_Bedroom' 0 0 0 0 0 0 0 1 1 1 1 1 0 0 0 0 0 0 0 0
 'Motion_Sensor_LR' 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1
 
-
 #Scenario 2
 # Sunny
 'Humidity' 16 8 3 18 16 27 41 42 17 23 11 47 3 42 47 47 16 22 35 16
