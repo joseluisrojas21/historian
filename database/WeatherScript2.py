@@ -69,15 +69,6 @@ def add_random_data():
   bedroom = random.choice([0, 1])
   lr = random.choice([0, 1])
   
-  add_temperature_data(temperature, timestamp)
-  add_pressure_data(pressure, timestamp)
-  add_irradiance_data(irradiance, timestamp)
-  add_humidity_data(humidity, timestamp)
-  add_garage_data(garage, timestamp)
-  add_bathroom_data(bathroom, timestamp)
-  add_bedroom_data(bedroom, timestamp)
-  add_lr_data(lr, timestamp)
-
   write_to_holding_register(client, sensor_registers['Humidity'],               humidity)
   write_to_holding_register(client, sensor_registers['Temperature'],            temperature)
   write_to_holding_register(client, sensor_registers['SunRadiation'],           irradiance)
@@ -87,9 +78,43 @@ def add_random_data():
   write_to_holding_register(client, sensor_registers['Motion_Sensor_Bedroom'],  bedroom)
   write_to_holding_register(client, sensor_registers['Motion_Sensor_LR'],       lr)
 
+  read_and_save_data()
+
 def write_to_holding_register(client, register_address, value):
   int_value = int(value)
   client.write_register(register_address, int_value)
+
+def read_from_holding_register(client, register_address, count=1):
+  # Read 'count' number of holding registers starting from 'register_address'
+  result = client.read_holding_registers(register_address, count)
+  
+  if not result.isError():
+    return result.registers
+  else:
+    print("Error reading holding registers:", result)
+    return None
+
+def read_from_coils(client, coil_address, count=1):
+  # Read 'count' number of coils starting from 'coil_address'
+  result = client.read_coils(coil_address, count)
+  
+  if not result.isError():
+    return result.bits
+  else:
+    print("Error reading coils:", result)
+    return None
+
+def read_and_save_data():
+  timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+  add_temperature_data(read_from_holding_register(client, sensor_registers['Temperature'])[0], timestamp)
+  add_pressure_data(read_from_holding_register(client, sensor_registers['Pressure'])[0], timestamp)
+  add_irradiance_data(read_from_holding_register(client, sensor_registers['SunRadiation'])[0], timestamp)
+  add_humidity_data(read_from_holding_register(client, sensor_registers['Humidity'])[0], timestamp)
+  add_garage_data(read_from_holding_register(client, sensor_registers['Motion_Sensor_Garage'])[0], timestamp)
+  add_bathroom_data(read_from_holding_register(client, sensor_registers['Motion_Sensor_Bathroom'])[0], timestamp)
+  add_bedroom_data(read_from_holding_register(client, sensor_registers['Motion_Sensor_Bedroom'])[0], timestamp)
+  add_lr_data(read_from_holding_register(client, sensor_registers['Motion_Sensor_LR'])[0], timestamp)
 
 def read_sensor_file(file_path, scenario_name):
   sensors = {}
@@ -170,16 +195,6 @@ def simulate_sensors(file_path):
         
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-        # Database
-        add_humidity_data(values_at_index[0],    timestamp)
-        add_temperature_data(values_at_index[1], timestamp)
-        add_irradiance_data(values_at_index[2],  timestamp)
-        add_pressure_data(values_at_index[3],    timestamp)
-        add_garage_data(values_at_index[4],      timestamp)
-        add_bathroom_data(values_at_index[5],    timestamp)
-        add_bedroom_data(values_at_index[6],     timestamp)
-        add_lr_data(values_at_index[7],          timestamp)
-
         # Registers
         write_to_holding_register(client, sensor_registers['Humidity'],               values_at_index[0])
         write_to_holding_register(client, sensor_registers['Temperature'],            values_at_index[1])
@@ -189,6 +204,9 @@ def simulate_sensors(file_path):
         write_to_holding_register(client, sensor_registers['Motion_Sensor_Bathroom'], values_at_index[5])
         write_to_holding_register(client, sensor_registers['Motion_Sensor_Bedroom'],  values_at_index[6])
         write_to_holding_register(client, sensor_registers['Motion_Sensor_LR'],       values_at_index[7])
+
+        # Database
+        read_and_save_data()
 
         print("-" * 30)
         data_count += 1
