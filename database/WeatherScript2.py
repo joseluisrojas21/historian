@@ -5,8 +5,7 @@ from datetime import datetime
 from pymodbus.client import ModbusTcpClient
 
 # Connect to the SQLite database
-# db_file = '/var/www/historian/database/testDB.db'
-db_file = 'testDB.db'
+db_file = '/var/www/historian/database/testDB.db'
 conn = sqlite3.connect(db_file)
 cursor = conn.cursor()
 
@@ -103,7 +102,7 @@ def add_random_data():
   write_to_holding_register(client, sensor_registers['Motion_Sensor_LR'],       lr)
 
   read_and_save_data()
-  
+
   coils = read_from_coils(client, 0, 12)
   addLog(coils, timestamp)
 
