@@ -40,6 +40,19 @@ app.get('/allData', (req, res) => {
   }
 });
 
+app.get('/allLogs', (req, res) => {
+  try {
+    const logs = db.prepare('SELECT timestamp, event, description FROM logs').all();
+
+    res.json({
+      logs
+    });
+  } catch (error) {
+    console.error('Error fetching logs:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 app.get('/deleteAllData', (req, res) => {
   try {
     db.prepare('DELETE FROM temperature_data').run();
@@ -50,6 +63,7 @@ app.get('/deleteAllData', (req, res) => {
     db.prepare('DELETE FROM bathroom_data').run();
     db.prepare('DELETE FROM bedroom_data').run();
     db.prepare('DELETE FROM lr_data').run();
+    db.prepare('DELETE FROM logs').run();
 
     res.json({ message: 'All data deleted successfully from all tables.' });
   } catch (error) {

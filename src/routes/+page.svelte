@@ -23,6 +23,9 @@
   let bedroomData:     { timestamp: string, bedroom: number }[] = [];
   let lrData:          { timestamp: string, lr: number }[] = [];
 
+  // Logs
+  let logs: { timestamp: string, event: string, description: string }[] = [];
+
   // Time labels
   let timeLabels: string[] = [];
 
@@ -71,6 +74,28 @@
       console.error('Error fetching all data:', error);
     }
   }
+
+  // Fetch all data
+  async function fetchLogs() {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/allLogs`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data && Array.isArray(data.logs)) {
+        logs = data.logs;
+        console.log(logs);
+      } else {
+        console.error('No logs found in response.');
+      }
+
+    } catch (error) {
+      console.error('Error fetching all data:', error);
+    }
+}
 
   function updateCharts() {
     updateTemperatureChart();
@@ -508,19 +533,21 @@
     }
   }
 
-  let logs = [
-    { event: "Temperature Rise", time: "2024-11-18 08:00", description: "Temperature exceeded threshold." },
-    { event: "Pressure Drop", time: "2024-11-18 09:30", description: "Pressure level dropped below minimum." },
-    { event: "Irradiance Spike", time: "2024-11-18 10:15", description: "Irradiance level spiked." },
-    { event: "Motion Detected (Garage)", time: "2024-11-18 11:00", description: "Motion sensor triggered in the garage." },
-    { event: "Humidity Increase", time: "2024-11-18 12:45", description: "Humidity level increased beyond normal range." },
-  ];
+  // let logs = [
+  //   { event: "Temperature Rise", time: "2024-11-18 08:00", description: "Temperature exceeded threshold." },
+  //   { event: "Pressure Drop", time: "2024-11-18 09:30", description: "Pressure level dropped below minimum." },
+  //   { event: "Irradiance Spike", time: "2024-11-18 10:15", description: "Irradiance level spiked." },
+  //   { event: "Motion Detected (Garage)", time: "2024-11-18 11:00", description: "Motion sensor triggered in the garage." },
+  //   { event: "Humidity Increase", time: "2024-11-18 12:45", description: "Humidity level increased beyond normal range." },
+  // ];
 
   onMount(() => {
     document.title = "Historian";
     fetchAllData();
+    fetchLogs();
     const interval = setInterval(() => {
       fetchAllData();
+      fetchLogs();
     }, 10000); // Update every 10 seconds
 
     onDestroy(() => {
@@ -617,7 +644,7 @@
         {#each logs as log}
           <tr>
             <td>{log.event}</td>
-            <td>{log.time}</td>
+            <td>{log.timestamp}</td>
             <td>{log.description}</td>
           </tr>
         {/each}
