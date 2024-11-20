@@ -575,7 +575,10 @@ async function deleteAllData() {
 </script>
 
 <main>
-  <!-- <h1>Historian</h1> -->
+  <h1>Historian</h1>
+
+  <!-- Charts -->
+  <!-- Block 1 -->
   <div class="charts-container">
     <div class="chart">
       <h2>Temperature Data</h2>
@@ -588,6 +591,7 @@ async function deleteAllData() {
     </div>
   </div>
 
+  <!-- Block 2 -->
   <div class="charts-container">
     <div class="chart">
       <h2>Irradiance Data</h2>
@@ -600,6 +604,7 @@ async function deleteAllData() {
     </div>
   </div>
 
+  <!-- Block 3 -->
   <div class="charts-container">
     <div class="chart">
       <h2>Garage Data</h2>
@@ -612,6 +617,7 @@ async function deleteAllData() {
     </div>
   </div>
 
+  <!-- Block 4 -->
   <div class="charts-container">
     <div class="chart">
       <h2>Bedroom Data</h2>
@@ -624,6 +630,7 @@ async function deleteAllData() {
     </div>
   </div>
 
+  <!-- Slider controls -->
   <div class="slider-controls">
     <label>
       Start Range:
@@ -670,7 +677,7 @@ async function deleteAllData() {
     </table>
   </section>
 
-  <!-- Button to Delete All Data (For now, just a placeholder) -->
+  <!-- Button to Delete All Data -->
   <div class="delete-button-container">
     <button on:click={handleDeleteConfirmation}>Delete All Data</button>
   </div>
