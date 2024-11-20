@@ -23,7 +23,7 @@ This project is a historian server for ICS (Industrial Control Systems), built t
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/historian.git
+git clone https://github.com/joseluisrojas21/historian.git
 cd historian
 ```
 ### 2. Install Dependencies
@@ -64,8 +64,8 @@ Add the following content:
 ```bash
 #!/bin/bash
 cd /var/www/historian
-/usr/bin/npm run dev &
-/usr/bin/node /var/www/historian/server/server.js
+npm run dev &
+node server/server.js
 ```
 
 Make the script executable:
