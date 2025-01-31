@@ -2,6 +2,8 @@
 
 This project is a historian server for ICS (Industrial Control Systems), built to graph records stored in a SQLite3 database. It uses a combination of Node.js, Svelte, and Nginx to serve a web interface that visualizes historical data. The server is initialized and managed via a systemd service, which runs a shell script (`historian.sh`) to start the necessary services at boot.
 
+![Historian  Screenshot](images/Historian1.png)
+
 ## Features
 
 - **SQLite3 Database Integration**: Reads historical records from a SQLite3 database.
